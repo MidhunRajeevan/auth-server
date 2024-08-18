@@ -9,6 +9,12 @@ public class AuthController {
     @GetMapping("/")
     public String Welcome()
     {
-        return "Welcome";
+        return "Login pAge";
+    }
+
+    @GetMapping("/notification")
+    public String Notification()
+    {
+        return  "first API";
     }
 }
