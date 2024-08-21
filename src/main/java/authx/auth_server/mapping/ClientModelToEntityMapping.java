@@ -2,34 +2,47 @@ package authx.auth_server.mapping;
 
 
 import authx.auth_server.entity.ClientEntity;
-import authx.auth_server.model.Application;
 import authx.auth_server.model.ClientModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.List;
+import java.sql.Timestamp;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ClientModelToEntityMapping {
 
     public ClientEntity ModelToEntityMapping(ClientModel modelClient) {
 
         ClientEntity clientEntity = new ClientEntity();
-
-        // Basic fields
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         clientEntity.setClientId(modelClient.getClientId());
         clientEntity.setClientSecret(modelClient.getClientSecret());
         clientEntity.setAuthorizedGrantTypes(modelClient.getAuthorizedGrantTypes());
         clientEntity.setAuthorities(modelClient.getAuthorities());
         clientEntity.setAccessTokenValidity(modelClient.getAccessTokenValidity());
         clientEntity.setRefreshTokenValidity(modelClient.getRefreshTokenValidity());
-//        clientEntity.setAdditionalInformation(modelClient.getAdditionalInformation());
         clientEntity.setStatus(modelClient.getStatus());
         clientEntity.setCreatedBy(modelClient.getCreatedBy());
         clientEntity.setUpdatedBy(modelClient.getUpdatedBy());
-        clientEntity.setCreatedAt(modelClient.getCreatedAt());
-        clientEntity.setUpdatedAt(modelClient.getUpdatedAt());
+        clientEntity.setCreatedAt(timestamp);
+        clientEntity.setUpdatedAt(timestamp);
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Application> applications=modelClient.getApplications();
+        if (modelClient.getApplications() != null) {
+            try {
+                clientEntity.setScope(objectMapper.writeValueAsString(modelClient.getApplications()));
+            } catch (Exception e) {
+                throw new RuntimeException("Error converting applications to JSON", e);
+            }
+        }
 
+        if (modelClient.getAdditionalInformation() != null) {
+            try {
+                clientEntity.setAdditionalInformation(objectMapper.writeValueAsString(modelClient.getAdditionalInformation()));
+            } catch (Exception e) {
+                throw new RuntimeException("Error converting additional information to JSON", e);
+            }
+        }
+        
         return clientEntity;
     }
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Type;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+
 import java.sql.Timestamp;
 
 @Data
@@ -25,7 +27,7 @@ public class ClientEntity {
 
     @Type(JsonBinaryType.class)
     @Column(name = "scope", columnDefinition = "jsonb")
-    private String application;
+    private String scope;
 
     @Column(name = "authorized_grant_types")
     private String authorizedGrantTypes;
@@ -39,7 +41,8 @@ public class ClientEntity {
     @Column(name = "refresh_token_validity")
     private Integer refreshTokenValidity;
 
-    @Column(name = "additional_information")
+    @Type(JsonBinaryType.class)
+    @Column(name = "additional_information", columnDefinition = "jsonb")
     private String additionalInformation;
 
     @Column(name="status")
@@ -56,4 +59,5 @@ public class ClientEntity {
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
 }

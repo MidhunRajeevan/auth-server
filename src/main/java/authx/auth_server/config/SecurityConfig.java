@@ -26,14 +26,28 @@ public class SecurityConfig {
     private String driverClassName;
 
 
+    // @Bean
+    // SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    //     http.csrf(csrfconfig->csrfconfig.disable());
+    //     http.authorizeHttpRequests((requests) -> requests.anyRequest().authenticated());
+    //     http.authorizeHttpRequests((request)->request.requestMatchers("/notification","register-client").permitAll());
+    //     http.formLogin(withDefaults());
+    //     http.httpBasic(withDefaults());
+    //     return http.build();
+    // }
+
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((requests) -> requests.anyRequest().authenticated());
-//        http.authorizeHttpRequests((request)->request.requestMatchers("/notification").permitAll());
-        http.formLogin(withDefaults());
-        http.httpBasic(withDefaults());
-        return http.build();
-    }
+    http.csrf(csrf -> csrf.disable())  // Disable CSRF protection
+        .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+            .requestMatchers("/notification", "/register-client").permitAll()  // Permit these endpoints without authentication
+            .anyRequest().authenticated()  // Authenticate other requests
+        )
+        .formLogin(withDefaults())  // Configure form-based login
+        .httpBasic(withDefaults());  // Configure HTTP Basic authentication
+
+    return http.build();
+}
 
     @Bean
     public PasswordEncoder passwordEncoder(){
