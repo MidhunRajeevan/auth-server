@@ -1,6 +1,6 @@
 package authx.auth_server.config;
 
-import authx.auth_server.entity.Client;
+import authx.auth_server.entity.ClientEntity;
 import authx.auth_server.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +23,8 @@ public class AuthClientConfig implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Client client= clientRepository.findByClientId(username).orElseThrow(()-> new UsernameNotFoundException("User Details Not Found " +username));
-        List<GrantedAuthority> authorities=List.of(new SimpleGrantedAuthority(client.getAuthorities()));
-        return new User(client.getClientId(),client.getClientSecret(),authorities);
+        ClientEntity clientEntity = clientRepository.findByClientId(username).orElseThrow(()-> new UsernameNotFoundException("User Details Not Found " +username));
+        List<GrantedAuthority> authorities=List.of(new SimpleGrantedAuthority(clientEntity.getAuthorities()));
+        return new User(clientEntity.getClientId(), clientEntity.getClientSecret(),authorities);
     }
 }

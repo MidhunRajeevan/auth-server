@@ -2,13 +2,14 @@ package authx.auth_server.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import java.sql.Timestamp;
 
 @Data
 @Entity
 @Table(name = "clients")
-public class Client {
+public class ClientEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +22,10 @@ public class Client {
     @Column(name = "client_secret")
     private String clientSecret;
 
-    @Column(name = "scope")
-    private String scope;
+
+    @Type(JsonBinaryType.class)
+    @Column(name = "scope", columnDefinition = "jsonb")
+    private String application;
 
     @Column(name = "authorized_grant_types")
     private String authorizedGrantTypes;

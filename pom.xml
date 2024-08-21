@@ -67,6 +67,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-60</artifactId> <!-- For Hibernate 6.x -->
+			<version>2.21.1</version> <!-- Or the latest version -->
+		</dependency>
 	</dependencies>
 
 	<build>
