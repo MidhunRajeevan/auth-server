@@ -27,10 +27,16 @@ public class AuthController {
         return "Login pAge";
     }
 
-    @GetMapping("/notification")
-    public String Notification()
+    @GetMapping("/tigo/accounts")
+    public String GetAccount()
     {
-        return  "first API";
+        return  "I can view the account";
+    }
+
+    @PostMapping("/tigo/accounts")
+    public String CreateAccount(@RequestBody String account)
+    {
+        return  "I can edit the account";
     }
 
     @PostMapping("/register-client")

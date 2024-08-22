@@ -18,7 +18,6 @@ public class ClientModelToEntityMapping {
         clientEntity.setClientId(modelClient.getClientId());
         clientEntity.setClientSecret(modelClient.getClientSecret());
         clientEntity.setAuthorizedGrantTypes(modelClient.getAuthorizedGrantTypes());
-        clientEntity.setAuthorities(modelClient.getAuthorities());
         clientEntity.setAccessTokenValidity(modelClient.getAccessTokenValidity());
         clientEntity.setRefreshTokenValidity(modelClient.getRefreshTokenValidity());
         clientEntity.setStatus(modelClient.getStatus());
@@ -27,9 +26,9 @@ public class ClientModelToEntityMapping {
         clientEntity.setCreatedAt(timestamp);
         clientEntity.setUpdatedAt(timestamp);
         ObjectMapper objectMapper = new ObjectMapper();
-        if (modelClient.getApplications() != null) {
+        if (modelClient.getAuthorities() != null) {
             try {
-                clientEntity.setScope(objectMapper.writeValueAsString(modelClient.getApplications()));
+                clientEntity.setAuthorities(objectMapper.writeValueAsString(modelClient.getAuthorities()));
             } catch (Exception e) {
                 throw new RuntimeException("Error converting applications to JSON", e);
             }

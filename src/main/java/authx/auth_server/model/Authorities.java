@@ -5,7 +5,7 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class Application {
+public class Authorities {
     private String appId;
     private String name;
     private Map<String, Boolean> permissions;

@@ -26,14 +26,12 @@ public class ClientEntity {
 
 
     @Type(JsonBinaryType.class)
-    @Column(name = "scope", columnDefinition = "jsonb")
-    private String scope;
+    @Column(name = "authorities", columnDefinition = "jsonb")
+    private String authorities;
 
     @Column(name = "authorized_grant_types")
     private String authorizedGrantTypes;
 
-    @Column(name = "authorities")
-    private String authorities;
 
     @Column(name = "access_token_validity")
     private Integer accessTokenValidity;

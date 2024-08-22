@@ -11,9 +11,8 @@ public class ClientModel {
     private long id;
     private String clientId;
     private String clientSecret;
-    private List<Application> applications;
+    private List<Authorities> authorities;
     private String authorizedGrantTypes;
-    private String authorities;
     private Integer accessTokenValidity;
     private Integer refreshTokenValidity;
     private Map<String, Object> additionalInformation;
