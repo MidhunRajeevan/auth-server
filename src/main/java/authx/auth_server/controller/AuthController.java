@@ -28,10 +28,10 @@ public class AuthController {
         return "Login pAge";
     }
 
-    @PostMapping("/test")
-    public String CreateAccount(@RequestBody String account)
+    @GetMapping("/test")
+    public String Test()
     {
-        return  "I can access the api";
+        return "Authenticated";
     }
 
     @PostMapping("/register-client")

@@ -59,18 +59,6 @@ import javax.sql.DataSource;
 @Configuration
 public class SecurityConfig {
 
-	@Value("${spring.datasource.url}")
-    private String url;
-
-    @Value("${spring.datasource.username}")
-    private String username;
-
-    @Value("${spring.datasource.password}")
-    private String password;
-
-    @Value("${spring.datasource.driver-class-name}")
-    private String driverClassName;
-
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -103,8 +91,7 @@ public class SecurityConfig {
     http.csrf(csrf -> csrf.disable()) 
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers( "/register-client").hasAuthority("admin")
-            .requestMatchers("/tigo").hasAuthority("admin")
-			.requestMatchers("/tigo/accounts").hasAuthority("admin")
+            .requestMatchers("/test").authenticated()
             .anyRequest().authenticated()
         )
 		.oauth2ResourceServer(oauth2 -> oauth2
@@ -114,39 +101,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-	@Bean 
-	public ApplicationRunner applicationRunner(RegisteredClientRepository registeredClientRepository) {
-		return args -> {
-
-			if (registeredClientRepository.findByClientId("thuser1")==null) {
-
-				TokenSettings tokenSettings=TokenSettings.builder()
-				.accessTokenTimeToLive(Duration.ofMinutes(15))
-                .refreshTokenTimeToLive(Duration.ofHours(2))
-                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                .reuseRefreshTokens(true)  
-                .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
-                .build();
-				RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-					.clientId("thuser1")
-					.clientSecret(passwordEncoder().encode("Thbs123!"))
-					.clientName("Client1")
-					.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-					.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-					.postLogoutRedirectUri("http://127.0.0.1:8080/")
-					.scope(OidcScopes.OPENID)
-					.scope(OidcScopes.PROFILE)
-					.scope("special_permission")
-					.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-					.tokenSettings(tokenSettings)
-					.build();
-					registeredClientRepository.save(oidcClient);
-			}
-		};
-		
-		
-	}
 
 	@Bean
     public RegisteredClientRepository registeredClientRepository(DataSource dataSource) {
