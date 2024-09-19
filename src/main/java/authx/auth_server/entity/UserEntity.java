@@ -2,9 +2,6 @@ package authx.auth_server.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import java.sql.Timestamp;
 

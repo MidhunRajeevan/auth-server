@@ -1,6 +1,5 @@
 package authx.auth_server.model;
 
-import java.util.Map;
 
 import lombok.Data;
 

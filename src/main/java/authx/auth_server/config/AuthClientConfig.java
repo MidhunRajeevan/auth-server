@@ -2,12 +2,10 @@ package authx.auth_server.config;
 
 import authx.auth_server.entity.UserEntity;
 import authx.auth_server.mapping.UserEntityToModelMapping;
-import authx.auth_server.model.ClientModel;
 import authx.auth_server.model.UserModel;
 import authx.auth_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
-import org.hibernate.mapping.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

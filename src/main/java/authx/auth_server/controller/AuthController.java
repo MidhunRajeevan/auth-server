@@ -1,7 +1,6 @@
 package authx.auth_server.controller;
 
 import authx.auth_server.model.ClientModel;
-import authx.auth_server.model.UserModel;
 import authx.auth_server.service.ClientService;
 
 import org.apache.logging.log4j.LogManager;
