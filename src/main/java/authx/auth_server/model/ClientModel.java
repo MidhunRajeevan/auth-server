@@ -1,24 +1,18 @@
 package authx.auth_server.model;
 
-import lombok.Data;
-
-import java.sql.Timestamp;
-import java.util.List;
 import java.util.Map;
+
+import lombok.Data;
 
 @Data
 public class ClientModel {
-    private long id;
     private String clientId;
     private String clientSecret;
-    private List<Authorities> authorities;
-    private String authorizedGrantTypes;
-    private Integer accessTokenValidity;
-    private Integer refreshTokenValidity;
-    private Map<String, Object> additionalInformation;
-    private String status;
-    private String createdBy;
-    private String updatedBy;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private String clientName;
+    private String clientAuthenticationMethod;
+    private String authorizationGrantType;
+    private String scope;
+    private Long accessTokenTimeToLive;
+    private Long refreshTokenTimeToLive;
+
 }

@@ -1,10 +1,10 @@
 package authx.auth_server.config;
 
-import authx.auth_server.entity.ClientEntity;
-import authx.auth_server.mapping.ClientEntityToModelMapping;
-import authx.auth_server.model.Authorities;
+import authx.auth_server.entity.UserEntity;
+import authx.auth_server.mapping.UserEntityToModelMapping;
 import authx.auth_server.model.ClientModel;
-import authx.auth_server.repository.ClientRepository;
+import authx.auth_server.model.UserModel;
+import authx.auth_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.hibernate.mapping.Map;
@@ -27,27 +27,22 @@ import java.util.stream.Collectors;
 public class AuthClientConfig implements UserDetailsService {
 
     @Autowired
-    private  final ClientRepository clientRepository;
+    private  final UserRepository clientRepository;
 
     @Autowired
-    private final ClientEntityToModelMapping clientEntityToModelMapping;
+    private final UserEntityToModelMapping clientEntityToModelMapping;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        ClientModel clientModel=null;
-        ClientEntity clientEntity = clientRepository.findByClientId(username).orElseThrow(()-> new UsernameNotFoundException("User Details Not Found " +username));
+        UserModel clientModel=null;
+        UserEntity clientEntity = clientRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException("User Details Not Found " +username));
         try {
            clientModel=clientEntityToModelMapping.EntityToModelMapping(clientEntity);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        List<GrantedAuthority> authorities = extractAuthorities(clientModel.getAuthorities());
-        return new User(clientEntity.getClientId(), clientEntity.getClientSecret(),authorities);
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(clientEntity.getRole()));
+        return new User(clientEntity.getUsername(), clientEntity.getPassword(),authorities);
     }
 
-    private List<GrantedAuthority> extractAuthorities(List<Authorities> authorities) {
-        return authorities.stream()
-                .map(authority -> new SimpleGrantedAuthority(authority.getName()))
-                .collect(Collectors.toList());
-    }
 }

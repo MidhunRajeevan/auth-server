@@ -1,13 +1,26 @@
 package authx.auth_server.service;
 
-import authx.auth_server.entity.ClientEntity;
+import authx.auth_server.entity.UserEntity;
 import authx.auth_server.mapping.ClientModelToEntityMapping;
 import authx.auth_server.model.ClientModel;
-import authx.auth_server.repository.ClientRepository;
+import authx.auth_server.model.UserModel;
+import authx.auth_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.time.Duration;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,19 +28,36 @@ import org.springframework.stereotype.Service;
 public class ClientService {
 
     @Autowired
-    private ClientRepository clientRepository;
+    private RegisteredClientRepository registeredClientRepository;
 
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private ClientModelToEntityMapping clientModelToEntityMapping;
 
     public ClientModel RegisterClient(ClientModel clientModel){
 
-        clientModel.setClientSecret(passwordEncoder.encode(clientModel.getClientSecret()));
-        ClientEntity clientEntity= clientModelToEntityMapping.ModelToEntityMapping(clientModel);
-        clientRepository.saveAndFlush(clientEntity);
+        if (registeredClientRepository.findByClientId(clientModel.getClientId())==null) {
+
+				TokenSettings tokenSettings=TokenSettings.builder()
+				.accessTokenTimeToLive(Duration.ofMinutes(clientModel.getAccessTokenTimeToLive()))
+                .refreshTokenTimeToLive(Duration.ofHours(clientModel.getRefreshTokenTimeToLive()))
+                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                .reuseRefreshTokens(true)  
+                .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
+                .build();
+				RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
+					.clientId(clientModel.getClientId())
+					.clientSecret(passwordEncoder.encode(clientModel.getClientSecret()))
+					.clientName(clientModel.getClientName())
+					.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+					.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+					.postLogoutRedirectUri("http://127.0.0.1:8080/")
+					.scope(clientModel.getScope())
+					.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+					.tokenSettings(tokenSettings)
+					.build();
+					registeredClientRepository.save(oidcClient);
+			}
 
         return  clientModel;
     }

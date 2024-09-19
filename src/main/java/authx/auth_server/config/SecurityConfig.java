@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
@@ -47,7 +48,6 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
 
 import java.security.KeyPair;
@@ -72,20 +72,6 @@ public class SecurityConfig {
     private String driverClassName;
 
 
-    // @Bean
-    // SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-    // http.csrf(csrf -> csrf.disable())  // Disable CSRF protection
-    //     .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-    //         .requestMatchers( "/register-client").hasAuthority("admin")
-    //         .requestMatchers("/tigo").hasAuthority("ViewAccount")
-    //         .anyRequest().authenticated()
-    //     )
-    //     .formLogin(withDefaults())  // Configure form-based login
-    //     .httpBasic(withDefaults());  // Configure HTTP Basic authentication
-
-    //     return http.build();
-    // }
-
     @Bean
     public PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -97,75 +83,70 @@ public class SecurityConfig {
 			throws Exception {
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-			.oidc(Customizer.withDefaults());	// Enable OpenID Connect 1.0
+			.oidc(Customizer.withDefaults());
 		http
-			// Redirect to the login page when not authenticated from the
-			// authorization endpoint
 			.exceptionHandling((exceptions) -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
 					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
 				)
 			)
-			// Accept access tokens for User Info and/or Client Registration
 			.oauth2ResourceServer((resourceServer) -> resourceServer
 				.jwt(Customizer.withDefaults()));
 
 		return http.build();
 	}
 
-	@Bean 
+	@Bean
 	@Order(2)
-	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
-			throws Exception {
-		http
-			.authorizeHttpRequests((authorize) -> authorize
-				.anyRequest().authenticated()
-			)
-			// Form login handles the redirect to the login page from the
-			// authorization server filter chain
-			.formLogin(Customizer.withDefaults());
+    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(csrf -> csrf.disable()) 
+        .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+            .requestMatchers( "/register-client").hasAuthority("admin")
+            .requestMatchers("/tigo").hasAuthority("admin")
+			.requestMatchers("/tigo/accounts").hasAuthority("admin")
+            .anyRequest().authenticated()
+        )
+		.oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(Customizer.withDefaults())
+        )
+        .httpBasic(Customizer.withDefaults());
 
-		return http.build();
-	}
+        return http.build();
+    }
 
 	@Bean 
 	public ApplicationRunner applicationRunner(RegisteredClientRepository registeredClientRepository) {
 		return args -> {
 
-			if (registeredClientRepository.findByClientId("admin1")==null) {
+			if (registeredClientRepository.findByClientId("thuser1")==null) {
+
+				TokenSettings tokenSettings=TokenSettings.builder()
+				.accessTokenTimeToLive(Duration.ofMinutes(15))
+                .refreshTokenTimeToLive(Duration.ofHours(2))
+                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                .reuseRefreshTokens(true)  
+                .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
+                .build();
 				RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-					.clientId("admin1")
-					.clientSecret("{bcrypt}$2a$10$vEcnFKH4tk9idrMYz8y0X.H0OFNZ/c77ntpe02nJCtNIYemukT9eq")
+					.clientId("thuser1")
+					.clientSecret(passwordEncoder().encode("Thbs123!"))
+					.clientName("Client1")
 					.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 					.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 					.postLogoutRedirectUri("http://127.0.0.1:8080/")
 					.scope(OidcScopes.OPENID)
 					.scope(OidcScopes.PROFILE)
+					.scope("special_permission")
 					.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+					.tokenSettings(tokenSettings)
 					.build();
-	
 					registeredClientRepository.save(oidcClient);
 			}
 		};
 		
 		
 	}
-	// @Bean 
-	// public RegisteredClientRepository registeredClientRepository() {
-	// 	RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-	// 			.clientId("admin")
-	// 			.clientSecret("{noop}admin@123")
-	// 			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-	// 			.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-	// 			.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-	// 			.scopes(scopeConfig->scopeConfig.addAll(List.of(OidcScopes.OPENID,"admin","user")))
-    //             .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofMinutes(10)).
-    //              accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED).build())
-	// 			.build();
-
-	// 	return new InMemoryRegisteredClientRepository(oidcClient);
-	// }
 
 	@Bean
     public RegisteredClientRepository registeredClientRepository(DataSource dataSource) {

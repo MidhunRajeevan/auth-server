@@ -1,6 +1,7 @@
 package authx.auth_server.controller;
 
 import authx.auth_server.model.ClientModel;
+import authx.auth_server.model.UserModel;
 import authx.auth_server.service.ClientService;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,24 +28,15 @@ public class AuthController {
         return "Login pAge";
     }
 
-    @GetMapping("/tigo/accounts")
-    public String GetAccount()
-    {
-        return  "I can view the account";
-    }
-
-    @PostMapping("/tigo/accounts")
+    @PostMapping("/test")
     public String CreateAccount(@RequestBody String account)
     {
-        return  "I can edit the account";
+        return  "I can access the api";
     }
 
     @PostMapping("/register-client")
     public ResponseEntity<ClientModel> RegisterClient(@RequestBody ClientModel clientModel){
-
-        log.debug(clientModel);
         clientService.RegisterClient(clientModel);
-
         return new ResponseEntity<ClientModel>(clientModel, HttpStatus.CREATED);
     }
 
